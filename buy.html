@@ -66,17 +66,92 @@ h1 { font-family: Georgia, serif; color: #C9A96E; font-size: 24px; text-align: c
 </div>
 
 <div class="order-info">
-<strong style="color:#C9A96E;">How to order:</strong>
+<strong style="color:#C9A96E;">How to order &mdash; 3 simple steps:</strong>
 </div>
 
 <div class="steps">
-<div class="step"><div class="step-num">1</div><div class="step-text">Scan the QR code to pay via PayPal with the exact amount</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text">Email your payment confirmation + city + style to <strong style="color:#C9A96E;">studio@urbanmemory.com</strong></div></div>
-<div class="step"><div class="step-num">3</div><div class="step-text">We generate and ship within 5-7 business days</div></div>
+<div class="step"><div class="step-num">1</div><div class="step-text">Scan the QR code with PayPal and send the exact amount for your selection</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text">Fill in the form below with your order details after payment</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text">We generate your custom map and ship within 5&ndash;7 business days</div></div>
 </div>
 
-<a href="https://flat-heat-typing-ear.trycloudflare.com" class="btn">View Full Site</a>
-<p style="text-align:center; color:#6B6B6B; font-size:11px; margin-top:12px;">https://flat-heat-typing-ear.trycloudflare.com</p>
+<!-- Order Form -->
+<div style="margin:20px 0; border-top:1px solid rgba(201,169,110,0.15); padding-top:20px;">
+<h3 style="font-family:Georgia, serif; color:#C9A96E; font-size:15px; margin-bottom:16px; text-align:center;">Submit Your Order</h3>
+<div id="orderForm">
+<input type="text" id="orderName" placeholder="Your Name" style="width:100%; padding:10px 12px; margin-bottom:10px; background:#0D0D0D; border:1px solid rgba(201,169,110,0.2); border-radius:6px; color:#E8E8E8; font-size:13px; box-sizing:border-box;">
+<input type="email" id="orderEmail" placeholder="Your Email" style="width:100%; padding:10px 12px; margin-bottom:10px; background:#0D0D0D; border:1px solid rgba(201,169,110,0.2); border-radius:6px; color:#E8E8E8; font-size:13px; box-sizing:border-box;">
+<input type="text" id="orderCity" placeholder="City (e.g. Hong Kong, Tokyo, Paris)" style="width:100%; padding:10px 12px; margin-bottom:10px; background:#0D0D0D; border:1px solid rgba(201,169,110,0.2); border-radius:6px; color:#E8E8E8; font-size:13px; box-sizing:border-box;">
+<select id="orderStyle" style="width:100%; padding:10px 12px; margin-bottom:10px; background:#0D0D0D; border:1px solid rgba(201,169,110,0.2); border-radius:6px; color:#E8E8E8; font-size:13px; box-sizing:border-box;">
+<option value="">Select Style</option>
+<option value="BLUEPRINT">Blueprint</option>
+<option value="CHARCOAL">Charcoal</option>
+<option value="URBAN_GRAIN">Urban Grain</option>
+<option value="NOLLI">Nolli</option>
+<option value="TERRA">Terra</option>
+<option value="SEPIA">Sepia</option>
+</select>
+<select id="orderSize" style="width:100%; padding:10px 12px; margin-bottom:10px; background:#0D0D0D; border:1px solid rgba(201,169,110,0.2); border-radius:6px; color:#E8E8E8; font-size:13px; box-sizing:border-box;">
+<option value="">Select Size</option>
+<option value="small_20x30">Small &mdash; 20x30cm / 8x12in &mdash; $89</option>
+<option value="medium_30x40">Medium &mdash; 30x40cm / 12x16in &mdash; $149</option>
+<option value="large_40x60">Large &mdash; 40x60cm / 16x24in &mdash; $249</option>
+</select>
+<textarea id="orderMessage" placeholder="Additional details or custom requests (optional)" rows="3" style="width:100%; padding:10px 12px; margin-bottom:12px; background:#0D0D0D; border:1px solid rgba(201,169,110,0.2); border-radius:6px; color:#E8E8E8; font-size:13px; box-sizing:border-box; resize:vertical;"></textarea>
+<button onclick="submitOrder()" class="btn" style="margin-bottom:8px;">Submit Order</button>
+<div id="orderStatus" style="text-align:center; font-size:13px; margin-top:8px; color:#8B7355;"></div>
+</div>
+</div>
+
+<script>
+const API_URL = 'https://flat-heat-typing-ear.trycloudflare.com';
+async function submitOrder() {
+  const btn = event.target;
+  const status = document.getElementById('orderStatus');
+  const data = {
+    name: document.getElementById('orderName').value.trim(),
+    email: document.getElementById('orderEmail').value.trim(),
+    city: document.getElementById('orderCity').value.trim(),
+    style: document.getElementById('orderStyle').value,
+    size: document.getElementById('orderSize').value,
+    message: document.getElementById('orderMessage').value.trim()
+  };
+  if (!data.name || !data.email || !data.city || !data.style) {
+    status.innerHTML = '&#9888;&#65039; Please fill in your name, email, city, and style';
+    return;
+  }
+  if (!data.email.includes('@')) {
+    status.innerHTML = '&#9888;&#65039; Please enter a valid email address';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  status.innerHTML = 'Submitting your order...';
+  try {
+    const res = await fetch(API_URL + '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+      status.innerHTML = '&#9989; Order submitted! We\'ll be in touch within 24 hours. Order ID: ' + result.orderId;
+      document.getElementById('orderForm').innerHTML = '<div style="text-align:center; padding:20px; color:#C9A96E;"><div style="font-size:40px; margin-bottom:10px;">&#9989;</div><strong>Order Received!</strong><br><span style="color:#8B7355; font-size:13px;">Your order has been saved. We\'ll email you at ' + data.email + ' within 24 hours with production details.</span></div>';
+    } else {
+      status.innerHTML = '&#10060; Error: ' + (result.error || 'Please try again or contact us');
+      btn.disabled = false;
+      btn.textContent = 'Submit Order';
+    }
+  } catch(e) {
+    status.innerHTML = '&#10060; Could not reach our server. Please try again or email your order details to <strong style="color:#C9A96E;">studio@urbanmemory.com</strong>';
+    btn.disabled = false;
+    btn.textContent = 'Submit Order';
+  }
+}
+</script>
+
+<a href="https://demianyuen.github.io/urban-memory/" class="btn">View Full Site</a>
+<p style="text-align:center; color:#6B6B6B; font-size:11px; margin-top:12px;">https://demianyuen.github.io/urban-memory/</p>
 </div>
 </body>
 </html>
